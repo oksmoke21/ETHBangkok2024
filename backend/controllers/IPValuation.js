@@ -1,4 +1,5 @@
 import { addIPValuation, fetchIPValuationByKeyword, removeIPValuation, updateIPValuation } from '../db/ip.js';
+import { addDueDiligence } from "../db/dueDiligence.js";
 
 const submitFormDB = async (req, res) => {
     try {
@@ -32,6 +33,17 @@ const submitFormDB = async (req, res) => {
             const storedForm = await addIPValuation(dbSubmitData);
             responseData = storedForm; // ?
             console.log("Created IP valuation form");
+        }
+        if (formData.dueDiligence) {
+            const dueDiligenceData = {
+                formId,
+                ipNumber: formData.ipNumber,
+                ...formData.dueDiligence
+            };
+
+            console.log('DueDiligenceData to be stored:', dueDiligenceData);
+            await addDueDiligence(dueDiligenceData);
+            console.log('Stored Due Diligence data');
         }
         res.status(201).send();
     } catch (error) {
