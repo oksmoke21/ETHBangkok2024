@@ -13,8 +13,8 @@ import {
   Check,
   CheckCheck
 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { getActivityLogs, getRecentActivities, addNotification } from '@/app/dashboard/marketplace/page'
+import { useWeb3Auth } from '@/contexts/Web3AuthContext'
+// import { getActivityLogs, getRecentActivities, addNotification } from '@/app/dashboard/marketplace/page'
 
 import { getMessageThreads, getThreadMessages } from '@/app/dashboard/marketplace/page'
 
@@ -59,7 +59,7 @@ const MOCK_CURRENT_USER = {
 }
 
 export default function Messages() {
-  const { isLoggedIn } = useAuth()
+  const { loggedIn } = useWeb3Auth()
   const [activeThread, setActiveThread] = useState<string | null>(null)
   const [messageInput, setMessageInput] = useState('')
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false)

@@ -920,34 +920,56 @@ ${currentUser.name}
 }
 
 // Add these helper functions for accessing logs
-export const getActivityLogs = () => {
-  return JSON.parse(localStorage.getItem('activityLogs') || '[]') as ActivityLog[]
+export const getActivityLogs = (): ActivityLog[] => {
+  const logs = JSON.parse(localStorage.getItem('activityLogs') || '[]');
+  return Array.isArray(logs) ? logs : [];
 }
 
-export const getRecentActivities = () => {
-  return JSON.parse(localStorage.getItem('recentActivities') || '[]')
+export const getRecentActivities = (): any[] => {
+  const activities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
+  return Array.isArray(activities) ? activities : [];
 }
 
-export const getMessageThreads = () => {
-  return JSON.parse(localStorage.getItem('messageThreads') || '[]') as MessageThread[]
+export const getMessageThreads = (): MessageThread[] => {
+  const threads = JSON.parse(localStorage.getItem('messageThreads') || '[]');
+  return Array.isArray(threads) ? threads : [];
 }
 
-export const getThreadMessages = (threadId: string) => {
-  const threads = getMessageThreads()
-  return threads.find(t => t.id === threadId)?.messages || []
+export const getThreadMessages = (threadId: string): MessageLog[] => {
+  const threads = getMessageThreads();
+  const thread = threads.find(t => t.id === threadId);
+
+  if (thread && Array.isArray(thread.messages)) {
+    return thread.messages.map(message => ({
+      id: message.id,
+      senderId: message.senderId,
+      receiverId: '', // Determine how to populate this
+      subject: '', // Determine how to populate this
+      message: message.content,
+      timestamp: message.timestamp,
+      ipId: message.ipId,
+      offerAmount: message.offerAmount
+    }));
+  }
+
+  return [];
 }
 
 export const addNotification = (notification: {
-  id: string
-  type: 'offer' | 'message' | 'system'
-  title: string
-  message: string
-  timestamp: Date
-  read: boolean
-  senderId: string
-  receiverId: string
+  id: string;
+  type: 'offer' | 'message' | 'system';
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+  senderId: string;
+  receiverId: string;
 }) => {
-  const notifications = JSON.parse(localStorage.getItem('notifications') || '[]')
-  notifications.unshift(notification)
-  localStorage.setItem('notifications', JSON.stringify(notifications))
-} 
+  const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+  if (Array.isArray(notifications)) {
+    notifications.unshift(notification);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  } else {
+    localStorage.setItem('notifications', JSON.stringify([notification]));
+  }
+}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Download, Edit, Coins } from 'lucide-react'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
+import { useWeb3Auth } from '@/contexts/Web3AuthContext'
 
 interface IP {
   id: string
@@ -18,7 +18,7 @@ interface IP {
 
 export default function MyIPs() {
   const [ips, setIps] = useState<IP[]>([])
-  const { isLawyer } = useAuth()
+  const { isLawyer } = useWeb3Auth()
 
   useEffect(() => {
     // Load IPs from localStorage or use dummy data if empty

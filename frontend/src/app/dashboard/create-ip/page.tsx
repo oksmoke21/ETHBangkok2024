@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Info } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useWeb3Auth } from '@/contexts/Web3AuthContext'
 
 export default function ListIP() {
   const router = useRouter()
-  const { isLawyer } = useAuth()
+  const { isLawyer } = useWeb3Auth()
   const [formData, setFormData] = useState({
     ipNumber: '',
     companyRegNumber: '',
