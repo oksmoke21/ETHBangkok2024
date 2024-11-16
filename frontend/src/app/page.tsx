@@ -67,14 +67,14 @@ export default function LandingPage() {
                 initial={{ 
                   opacity: 0,
                   scale: 0,
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight
+                  x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : 0,
+                  y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : 0
                 }}
                 animate={{ 
                   opacity: [0, 1, 0],
                   scale: [0, 1, 0],
-                  x: Math.random() * window.innerWidth,
-                  y: Math.random() * window.innerHeight
+                  x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : 0,
+                  y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : 0
                 }}
                 transition={{
                   duration: Math.random() * 3 + 2,
