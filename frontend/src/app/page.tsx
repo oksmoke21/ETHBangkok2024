@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, Shield, Users, Globe, Zap, CheckCircle2, X, User2, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useWeb3Auth } from '../contexts/Web3AuthContext';
 
 // Add new interface for marketplace items
 interface MarketplaceItem {
@@ -31,6 +32,7 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null)
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+  const { web3auth, getAccounts, setLoggedIn, setProvider } = useWeb3Auth();
   const router = useRouter()
 
   // Sample marketplace items
@@ -113,6 +115,61 @@ export default function LandingPage() {
     },
     // Add more items as needed
   ]
+
+  const handleLogin = async () => {
+    if (web3auth) {
+        if (web3auth.connected) {
+            setLoggedIn(true);
+        }
+
+        await web3auth.connect();
+
+        const userInfo = await web3auth.getUserInfo();
+        const address: string = await getAccounts();
+        console.log('User info: ', userInfo);
+        console.log('User address: ', address);
+
+        // Store userInfo and address in local storage
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            localStorage.setItem('address', address);
+        }
+
+        let _showOnboardingModal = false;
+
+        try {
+            const serverResponse = await fetch(`${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/postLoginFlow`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ address: address, userInfo: userInfo }),
+            });
+
+            const data = await serverResponse.json();
+            console.log('Server response data: ', data);
+
+            if (!data.onboarded) {
+                _showOnboardingModal = true;
+                // if (data.accountType == "lawyer") {
+                    // router.push(`/dashboard?showOnboardingModal=${_showOnboardingModal}`); // Navigate to lawyer dashboard with onboarding modal flag
+                // } else {
+                    router.push(`/dashboard?showOnboardingModal=${_showOnboardingModal}`); // Navigate to dashboard with onboarding modal flag
+                // }
+            } else {
+                if (data.isLawyer) {
+                    router.push(`/lawyerDashboard`); // Navigate to lawyer dashboard
+                } else {
+                    router.push(`/dashboard`); // Navigate to user dashboard
+                }
+            }
+
+        } catch (error) {
+            console.log('Error: ', error);
+            throw error;
+        }
+    }
+};
 
   const handleItemClick = (item: MarketplaceItem) => {
     setSelectedItem(item)
@@ -280,8 +337,9 @@ export default function LandingPage() {
             >
               <button className="px-8 py-4 border border-emerald-500/30 rounded-lg 
                                hover:bg-emerald-500/10 transition-all duration-300
-                               hover:border-emerald-500/50">
-                Sign Up Today
+                               hover:border-emerald-500/50"
+                      onClick={handleLogin}>
+                Sign In
               </button>
             </motion.div>
           </motion.div>

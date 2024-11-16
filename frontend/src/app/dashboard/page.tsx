@@ -22,7 +22,7 @@ import {
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import { NotificationPopup } from '@/components/ui/notification-popup'
-import { useAuth } from '@/contexts/AuthContext'
+import { useWeb3Auth } from '@/contexts/Web3AuthContext'
 import { useRouter } from 'next/navigation'
 
 interface DashboardCard {
@@ -36,7 +36,7 @@ interface DashboardCard {
 export default function Dashboard() {
   const [notifications, setNotifications] = useState(0)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-  const { isLoggedIn, isLawyer, setIsLawyer, setIsLoggedIn } = useAuth()
+  const { loggedIn, isLawyer, setIsLawyer, setLoggedIn } = useWeb3Auth()
   const router = useRouter()
   
   const primaryCards: DashboardCard[] = [
@@ -118,12 +118,12 @@ export default function Dashboard() {
             
             <div className="flex items-center gap-4">
               {/* Login/Role Toggle Section */}
-              {!isLoggedIn ? (
+              {!loggedIn ? (
                 <div className="flex items-center gap-2">
                   <motion.button
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    onClick={() => setIsLoggedIn(true)}
+                    onClick={() => setLoggedIn(true)}
                     className="p-2 rounded-lg transition-colors border flex items-center gap-2
                               bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
                   >
@@ -185,7 +185,7 @@ export default function Dashboard() {
           />
 
           {/* Login Required Banner */}
-          {!isLoggedIn && (
+          {!loggedIn && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
