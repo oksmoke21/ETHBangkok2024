@@ -28,7 +28,7 @@ const Web3ModalAuthContext = createContext<Web3AuthContextDataType | null>(
 	null
 );
 
-const clientId = 'BDnyiZK_RjjZ0Y9qdjoazWedg3BYQTDEGmuwdwGT4LNrhAZogJmo6QvLUrAcg2jSfrsV7zfig-TEAG0OlbszF6Y';
+const clientId = 'BN2-kRxyfXwM-dlrtOVwwROVOmEuA6Lz5iRNonCf-4wK3rYQDY0KokQb2cFJCXwm6TGsPFJ76E6Jdo5aTuff7RQ';
 
 // Sepolia Testnet:
 
@@ -67,7 +67,7 @@ const web3AuthOptions: Web3AuthOptions = {
 	web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
 	uiConfig: {
 		uxMode: "popup",
-		appName: "HyDRAULIC",
+		appName: "IPSphere",
 		appUrl: "https://web3auth.io/",
 		theme: {
 		  primary: "#7ed6df",
@@ -96,15 +96,9 @@ export const Web3AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
 	const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
 	const [loggedIn, setLoggedIn] = useState(false);
-	const [walletServicesPlugin, setWalletServicesPlugin] =
-		useState<WalletServicesPlugin | null>(null);
+	const [walletServicesPlugin, setWalletServicesPlugin] = useState<WalletServicesPlugin | null>(null);
 	const [provider, setProvider] = useState<IProvider | null>(null);
-	const [isLawyer, setIsLawyer] = useState(() => {
-		if (typeof window !== 'undefined') {
-			return localStorage.getItem('isLawyer') === 'true';
-		}
-		return false;
-	});
+	const [isLawyer, setIsLawyer] = useState(false);
 
 	useEffect(() => {
 		localStorage.setItem('isLawyer', isLawyer.toString());

@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Search, 
-  Grid, 
-  List, 
-  Filter as FilterIcon, 
+import { useRouter } from 'next/navigation'
+import {
+  Search,
+  Grid,
+  List,
+  Filter as FilterIcon,
   Heart,
   Star,
   MapPin,
@@ -23,7 +24,6 @@ import {
   Info
 } from 'lucide-react'
 import { Tooltip } from '@/components/ui/tooltip'
-import { useRouter } from 'next/navigation'
 
 interface IP {
   id: string
@@ -70,14 +70,12 @@ interface NegotiationModalProps {
   onClose: () => void
   ip: IP
 }
-
 interface IPDetailModalProps {
   ip: IP
   onClose: () => void
   onNegotiate: () => void
   onContactVendor: () => void
 }
-
 interface MessageLog {
   id: string
   senderId: string
@@ -88,7 +86,6 @@ interface MessageLog {
   ipId?: string
   offerAmount?: string
 }
-
 // Add this interface for message threads
 interface MessageThread {
   id: string
@@ -104,7 +101,6 @@ interface MessageThread {
   }[]
   lastUpdated: Date
 }
-
 // Add these interfaces at the top with other interfaces
 interface ActivityLog {
   id: string
@@ -216,22 +212,10 @@ export default function Marketplace() {
       blockchainVerified: true,
       ownerId: 'user126'
     }
+    // Add more mock data
   ])
 
-  // WebSocket connection for real-time updates
-  useEffect(() => {
-    const ws = new WebSocket('wss://your-websocket-server')
-    
-    ws.onmessage = (event) => {
-      const update = JSON.parse(event.data)
-      setMockData(prev => prev.map(ip => 
-        ip.id === update.ipId ? { ...ip, ...update.changes } : ip
-      ))
-    }
-
-    return () => ws.close()
-  }, [])
-
+  const router = useRouter()
   // Handlers
   const handleNegotiation = (ipId: string) => {
     setSelectedIPForNegotiation(ipId)
@@ -244,7 +228,7 @@ export default function Marketplace() {
   }
 
   const handleToggleFavorite = (ipId: string) => {
-    setMockData(prev => prev.map(ip => 
+    setMockData(prev => prev.map(ip =>
       ip.id === ipId ? { ...ip, isFavorited: !ip.isFavorited } : ip
     ))
     // Sync with localStorage
@@ -256,36 +240,47 @@ export default function Marketplace() {
     }
   }
 
+  // Add new function to handle vendor contact
+  const handleContactVendor = (ownerId: string, ipTitle: string) => {
+    router.push(`/dashboard/messages?recipient=${ownerId}&subject=Regarding: ${ipTitle}`)
+  }
+
   // Filter and search logic
   const filteredIPs = useMemo(() => {
     return mockData.filter(ip => {
       const searchMatch = ip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         ip.description.toLowerCase().includes(searchQuery.toLowerCase())
-      
-      const categoryMatch = filters.categories.length === 0 || 
-                          filters.categories.includes(ip.category)
-      
+        ip.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const categoryMatch = filters.categories.length === 0 ||
+        filters.categories.includes(ip.category)
+
       const locationMatch = filters.locations.length === 0 ||
-                          filters.locations.includes(ip.location)
-      
+        filters.locations.includes(ip.location)
+
       const verificationMatch = filters.verificationStatus.length === 0 ||
-                               filters.verificationStatus.includes(ip.verificationStatus)
-      
+        filters.verificationStatus.includes(ip.verificationStatus)
+
       const blockchainMatch = filters.blockchainStatus === 'all' ||
-                             (filters.blockchainStatus === 'verified' && ip.blockchainVerified) ||
-                             (filters.blockchainStatus === 'unverified' && !ip.blockchainVerified)
+        (filters.blockchainStatus === 'verified' && ip.blockchainVerified) ||
+        (filters.blockchainStatus === 'unverified' && !ip.blockchainVerified)
 
       return searchMatch && categoryMatch && locationMatch && verificationMatch && blockchainMatch
     })
   }, [mockData, searchQuery, filters])
 
-  // Add this to the Marketplace component
-  const router = useRouter()
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    const ws = new WebSocket('wss://your-websocket-server')
 
-  // Add new function to handle vendor contact
-  const handleContactVendor = (ownerId: string, ipTitle: string) => {
-    router.push(`/dashboard/messages?recipient=${ownerId}&subject=Regarding: ${ipTitle}`)
-  }
+    ws.onmessage = (event) => {
+      const update = JSON.parse(event.data)
+      setMockData(prev => prev.map(ip =>
+        ip.id === update.ipId ? { ...ip, ...update.changes } : ip
+      ))
+    }
+
+    return () => ws.close()
+  }, [])
 
   return (
     <div className="p-8">
@@ -352,46 +347,45 @@ export default function Marketplace() {
         <div className="flex-1 min-w-[300px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
+            <input
+              type="text"
               placeholder="Search IPs by name, category, or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-gray-900 border border-emerald-500/20 rounded-lg pl-10 pr-4 py-2
                      focus:ring-2 focus:ring-emerald-500/40 focus:border-transparent transition-all"
-          />
-          </div>
-        </div>
-        
-        {/* View Toggle */}
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-colors
-                      ${viewMode === 'grid' 
-                        ? 'bg-emerald-500/20 text-emerald-400' 
-                        : 'bg-gray-900 text-gray-400 hover:text-emerald-400'}`}
-          >
-            <Grid className="w-5 h-5" />
-            </button>
-            <button 
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-colors
-                      ${viewMode === 'list' 
-                        ? 'bg-emerald-500/20 text-emerald-400' 
-                        : 'bg-gray-900 text-gray-400 hover:text-emerald-400'}`}
-          >
-            <List className="w-5 h-5" />
-            </button>
+            />
           </div>
         </div>
 
+        {/* View Toggle */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-lg transition-colors
+                      ${viewMode === 'grid'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-gray-900 text-gray-400 hover:text-emerald-400'}`}
+          >
+            <Grid className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-lg transition-colors
+                      ${viewMode === 'list'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-gray-900 text-gray-400 hover:text-emerald-400'}`}
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
       {/* IP Grid/List */}
-      <div className={`grid ${
-        viewMode === 'grid' 
-          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-          : 'grid-cols-1'
-      } gap-6`}>
+      <div className={`grid ${viewMode === 'grid'
+        ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        : 'grid-cols-1'
+        } gap-6`}>
         {filteredIPs.map((ip) => (
           <IPCard
             key={ip.id}
@@ -399,19 +393,19 @@ export default function Marketplace() {
             isSelected={selectedIPs.includes(ip.id)}
             onSelect={(selected) => {
               if (selected) {
-                    setSelectedIPs([...selectedIPs, ip.id])
-                  } else {
-                    setSelectedIPs(selectedIPs.filter(id => id !== ip.id))
-                  }
-                }}
+                setSelectedIPs([...selectedIPs, ip.id])
+              } else {
+                setSelectedIPs(selectedIPs.filter(id => id !== ip.id))
+              }
+            }}
             onNegotiate={() => handleNegotiation(ip.id)}
             onDownloadSummary={() => handleDownloadSummary(ip.id)}
             onToggleFavorite={() => handleToggleFavorite(ip.id)}
             onCardClick={(ip) => setSelectedIPForDetail(ip)}
           />
         ))}
-            </div>
-            
+      </div>
+
       {/* Detail Modal */}
       {selectedIPForDetail && (
         <IPDetailModal
@@ -424,7 +418,7 @@ export default function Marketplace() {
           onContactVendor={() => handleContactVendor(selectedIPForDetail.ownerId, selectedIPForDetail.title)}
         />
       )}
-            
+
       {/* Negotiation Modal */}
       {showNegotiationModal && selectedIPForNegotiation && (
         <NegotiationModal
@@ -436,22 +430,23 @@ export default function Marketplace() {
           }}
         />
       )}
-              </div>
+    </div>
   )
 }
 
 // Add these components at the bottom of the file
-function IPCard({ 
-  ip, 
-  isSelected, 
-  onSelect, 
-  onNegotiate, 
-  onDownloadSummary, 
+// Add these components at the bottom of the file
+function IPCard({
+  ip,
+  isSelected,
+  onSelect,
+  onNegotiate,
+  onDownloadSummary,
   onToggleFavorite,
-  onCardClick 
+  onCardClick
 }: IPCardProps) {
   const router = useRouter()
-  
+
   const handleContactVendor = (ownerId: string, ipTitle: string) => {
     router.push(`/dashboard/messages?recipient=${ownerId}&subject=Regarding: ${ipTitle}`)
   }
@@ -477,13 +472,13 @@ function IPCard({
       <div className="relative">
         {/* Thumbnail */}
         <div className="relative h-48">
-          <img 
-            src={ip.thumbnail} 
+          <img
+            src={ip.thumbnail}
             alt={ip.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute top-2 right-2 flex gap-2">
-            <button 
+            <button
               onClick={onToggleFavorite}
               className="p-2 bg-gray-900/80 rounded-full hover:bg-gray-800 transition-colors"
               aria-label={ip.isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -508,7 +503,7 @@ function IPCard({
                 <span>{ip.price}</span>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <MapPin className="w-4 h-4" />
               <span>{ip.location}</span>
@@ -540,11 +535,10 @@ function IPCard({
             )}
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
-                <Star 
+                <Star
                   key={i}
-                  className={`w-4 h-4 ${
-                    i < ip.interestLevel ? 'fill-amber-400 text-amber-400' : 'text-gray-600'
-                  }`}
+                  className={`w-4 h-4 ${i < ip.interestLevel ? 'fill-amber-400 text-amber-400' : 'text-gray-600'
+                    }`}
                 />
               ))}
             </div>
@@ -557,7 +551,7 @@ function IPCard({
                        transition-colors flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
-              Contact Vendor
+              Contact
             </button>
             <button
               onClick={onNegotiate}
@@ -599,8 +593,8 @@ function IPDetailModal({ ip, onClose, onNegotiate, onContactVendor }: IPDetailMo
 
         <div className="space-y-6">
           <div className="relative h-64">
-            <img 
-              src={ip.thumbnail} 
+            <img
+              src={ip.thumbnail}
               alt={ip.title}
               className="w-full h-full object-cover rounded-lg"
             />
@@ -665,7 +659,7 @@ function IPDetailModal({ ip, onClose, onNegotiate, onContactVendor }: IPDetailMo
                          transition-colors flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-5 h-5" />
-                Contact Vendor
+                Contact
               </button>
             </div>
           </div>
@@ -680,7 +674,7 @@ function NegotiationModal({ ipId, ip, onClose }: NegotiationModalProps) {
   const [offer, setOffer] = useState('')
   const [message, setMessage] = useState('')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
-  
+
   // Mock current user data (replace with actual auth context)
   const currentUser = {
     id: 'current-user-id',
@@ -757,18 +751,6 @@ function NegotiationModal({ ipId, ip, onClose }: NegotiationModalProps) {
     localStorage.setItem('recentActivities', JSON.stringify(
       recentActivities.slice(0, 10) // Keep last 10 recent activities
     ))
-
-    // Add notification for the recipient
-    addNotification({
-      id: `notif-${Date.now()}`,
-      type: 'offer',
-      title: `New Offer for ${ip.title}`,
-      message: `${currentUser.name} sent an offer of $${offer}`,
-      timestamp: new Date(),
-      read: false,
-      senderId: currentUser.id,
-      receiverId: ip.ownerId
-    })
   }
 
   const handleSubmitOffer = () => {
@@ -917,59 +899,4 @@ ${currentUser.name}
       </motion.div>
     </div>
   )
-}
-
-// Add these helper functions for accessing logs
-export const getActivityLogs = (): ActivityLog[] => {
-  const logs = JSON.parse(localStorage.getItem('activityLogs') || '[]');
-  return Array.isArray(logs) ? logs : [];
-}
-
-export const getRecentActivities = (): any[] => {
-  const activities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
-  return Array.isArray(activities) ? activities : [];
-}
-
-export const getMessageThreads = (): MessageThread[] => {
-  const threads = JSON.parse(localStorage.getItem('messageThreads') || '[]');
-  return Array.isArray(threads) ? threads : [];
-}
-
-export const getThreadMessages = (threadId: string): MessageLog[] => {
-  const threads = getMessageThreads();
-  const thread = threads.find(t => t.id === threadId);
-
-  if (thread && Array.isArray(thread.messages)) {
-    return thread.messages.map(message => ({
-      id: message.id,
-      senderId: message.senderId,
-      receiverId: '', // Determine how to populate this
-      subject: '', // Determine how to populate this
-      message: message.content,
-      timestamp: message.timestamp,
-      ipId: message.ipId,
-      offerAmount: message.offerAmount
-    }));
-  }
-
-  return [];
-}
-
-export const addNotification = (notification: {
-  id: string;
-  type: 'offer' | 'message' | 'system';
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  senderId: string;
-  receiverId: string;
-}) => {
-  const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-  if (Array.isArray(notifications)) {
-    notifications.unshift(notification);
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-  } else {
-    localStorage.setItem('notifications', JSON.stringify([notification]));
-  }
 }

@@ -14,9 +14,6 @@ import {
   CheckCheck
 } from 'lucide-react'
 import { useWeb3Auth } from '@/contexts/Web3AuthContext'
-// import { getActivityLogs, getRecentActivities, addNotification } from '@/app/dashboard/marketplace/page'
-
-import { getMessageThreads, getThreadMessages } from '@/app/dashboard/marketplace/page'
 
 interface Message {
   id: string
@@ -24,9 +21,6 @@ interface Message {
   timestamp: string
   status: 'sent' | 'delivered' | 'read'
   isOwn: boolean
-  isOffer?: boolean
-  offerAmount?: string
-  read: boolean
 }
 
 interface Thread {
@@ -38,24 +32,6 @@ interface Thread {
   timestamp: string
   unread: number
   messages: Message[]
-}
-
-interface Notification {
-  id: string
-  type: 'offer' | 'message' | 'system'
-  title: string
-  message: string
-  timestamp: Date
-  read: boolean
-  senderId: string
-  receiverId: string
-}
-
-const MOCK_CURRENT_USER = {
-  id: 'current-user-id',
-  name: 'John Doe',
-  walletId: '0x1234...5678',
-  email: 'john@example.com'
 }
 
 export default function Messages() {
@@ -77,16 +53,14 @@ export default function Messages() {
           content: "Hello! I'd like to discuss the IP valuation.",
           timestamp: '10:30 AM',
           status: 'read',
-          isOwn: true,
-          read: false
+          isOwn: true
         },
         {
           id: 'm2',
           content: "Sure! I've reviewed the documents. When would you like to schedule a call?",
           timestamp: '10:32 AM',
           status: 'read',
-          isOwn: false,
-          read: false
+          isOwn: false
         }
       ]
     },
@@ -103,74 +77,11 @@ export default function Messages() {
           content: "Hi Bob, regarding the patent discussion...",
           timestamp: '11:45 AM',
           status: 'delivered',
-          isOwn: true,
-          read: false
+          isOwn: true
         }
       ]
     }
   ])
-
-  const [unreadCount, setUnreadCount] = useState(0)
-
-  useEffect(() => {
-    // Load threads from localStorage
-    const storedThreads = getMessageThreads()
-    if (storedThreads) {
-      setThreads(storedThreads.map(thread => {
-        const recipient = thread.participants.find(p => p !== MOCK_CURRENT_USER.id)
-        const lastMessage = thread.messages[thread.messages.length - 1]
-        
-        return {
-          id: thread.id,
-          recipientName: recipient || 'Unknown',
-          lastMessage: lastMessage?.content || '',
-          timestamp: new Date(thread.lastUpdated).toLocaleString(),
-          unread: thread.messages.filter(m => m.senderId !== MOCK_CURRENT_USER.id).length,
-          messages: thread.messages.map(m => ({
-            id: m.id,
-            content: m.content,
-            timestamp: new Date(m.timestamp).toLocaleTimeString(),
-            status: 'read',
-            isOwn: m.senderId === MOCK_CURRENT_USER.id,
-            isOffer: m.isOffer,
-            offerAmount: m.offerAmount,
-            read: m.senderId === MOCK_CURRENT_USER.id
-          }))
-        }
-      }))
-    }
-
-    // Mark messages as read when opening thread
-    const handleMarkAsRead = (threadId: string) => {
-      const storedThreads = getMessageThreads()
-      const updatedThreads = storedThreads.map(thread => {
-        if (thread.id === threadId) {
-          return {
-            ...thread,
-            messages: thread.messages.map(m => ({
-              ...m,
-              read: true
-            }))
-          }
-        }
-        return thread
-      })
-      localStorage.setItem('messageThreads', JSON.stringify(updatedThreads))
-    }
-
-    if (activeThread) {
-      handleMarkAsRead(activeThread)
-    }
-
-    // Load notifications
-    const notifications: Notification[] = JSON.parse(
-      localStorage.getItem('notifications') || '[]'
-    )
-    const unreadNotifications = notifications.filter(
-      n => !n.read && n.receiverId === MOCK_CURRENT_USER.id
-    )
-    setUnreadCount(unreadNotifications.length)
-  }, [activeThread])
 
   const handleSendMessage = (content: string) => {
     if (!activeThread || !content.trim()) return
@@ -180,26 +91,10 @@ export default function Messages() {
       content: content.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'sent',
-      isOwn: true,
-      read: false
+      isOwn: true
     }
 
-    // Store message in localStorage
-    const storedThreads = getMessageThreads()
-    const threadIndex = storedThreads.findIndex(t => t.id === activeThread)
-    
-    if (threadIndex !== -1) {
-      storedThreads[threadIndex].messages.push({
-        id: newMessage.id,
-        senderId: MOCK_CURRENT_USER.id,
-        content: newMessage.content,
-        timestamp: new Date(),
-      })
-      storedThreads[threadIndex].lastUpdated = new Date()
-      localStorage.setItem('messageThreads', JSON.stringify(storedThreads))
-    }
-
-    // Update UI
+    // Update threads with new message
     setThreads(prev => prev.map(thread => {
       if (thread.id === activeThread) {
         return {
@@ -267,13 +162,6 @@ export default function Messages() {
           {/* Thread List */}
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <div className="space-y-2">
-              {unreadCount > 0 && (
-                <div className="px-4 py-2 mb-4 bg-emerald-500/10 rounded-lg">
-                  <span className="text-emerald-400">
-                    {unreadCount} new {unreadCount === 1 ? 'message' : 'messages'}
-                  </span>
-                </div>
-              )}
               {threads.map((thread) => (
                 <button
                   key={thread.id}
@@ -333,18 +221,9 @@ export default function Messages() {
                         ? 'bg-emerald-500/20 text-emerald-400' 
                         : 'bg-gray-800 text-gray-300'
                     } rounded-lg p-3`}>
-                      {message.isOffer && (
-                        <div className="mb-2 p-2 bg-emerald-500/10 rounded-lg">
-                          <span className="text-emerald-400 font-medium">
-                            Offer Amount: ${message.offerAmount}
-                          </span>
-                        </div>
-                      )}
                       <p>{message.content}</p>
                       <div className="flex items-center justify-end gap-1 mt-1">
-                        <span className="text-xs text-gray-400">
-                          {message.timestamp}
-                        </span>
+                        <span className="text-xs text-gray-400">{message.timestamp}</span>
                         {message.isOwn && (
                           <span className="ml-1">
                             {message.status === 'sent' && <Check className="w-3 h-3 text-gray-400" />}
@@ -412,8 +291,7 @@ export default function Messages() {
               content: message,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               status: 'sent',
-              isOwn: true,
-              read: false
+              isOwn: true
             }]
           }
           setThreads(prev => [newThread, ...prev])

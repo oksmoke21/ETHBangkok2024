@@ -24,7 +24,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} h-full bg-gray-950 antialiased`}>
-        <Web3AuthProvider>{children}
+        <Web3AuthProvider>
           <div className="relative min-h-screen">
             {/* Background gradient effects */}
             <div className="fixed inset-0 bg-gradient-radial from-emerald-500/5 to-transparent" />

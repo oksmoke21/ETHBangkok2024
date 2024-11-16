@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Globe, 
@@ -21,9 +22,9 @@ import {
 } from 'lucide-react'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
+import OnboardingModal from '@/components/ui/onboardingmodal'
 import { NotificationPopup } from '@/components/ui/notification-popup'
 import { useWeb3Auth } from '@/contexts/Web3AuthContext'
-import { useRouter } from 'next/navigation'
 
 interface DashboardCard {
   title: string
@@ -34,9 +35,11 @@ interface DashboardCard {
 }
 
 export default function Dashboard() {
+  const searchParams = useSearchParams();
   const [notifications, setNotifications] = useState(0)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const { loggedIn, isLawyer, setIsLawyer, setLoggedIn } = useWeb3Auth()
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const router = useRouter()
   
   const primaryCards: DashboardCard[] = [
@@ -63,6 +66,51 @@ export default function Dashboard() {
     }, 1500)
     return () => clearTimeout(timer)
   }, [])
+
+  const [ips, setIps] = useState<any[]>([]);
+	const [address, setAddress] = useState<string>('');
+	const [firstName, setFirstName] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(true);
+
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const userInfo = window.localStorage["userInfo"];
+			const _address = window.localStorage.getItem('address');
+			if (userInfo) {
+				try {
+					const userInfoJSON = JSON.parse(userInfo);
+					setFirstName(userInfoJSON.name.split(' ')[0]);
+				} catch (error) {
+					console.error("Error parsing userInfo from localStorage", error);
+				}
+			}
+			if (_address) {
+				try {
+					setAddress(_address);
+				} catch (error) {
+					console.error('Error parsing userInfo from localStorage', error);
+				}
+			}
+		}
+	}, []);
+
+	useEffect(() => {
+		const fetchIps = async () => {
+			if (address) {
+				try {
+					const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/ipTokenization/getMyIPs?address=${address}`);
+					const data = await response.json();
+					console.log('API Response:', data);
+					setIps(data); // Handle case where forms might be undefined
+				} catch (error) {
+					console.error('Error fetching tokenized IPs:', error);
+				} finally {
+					setLoading(false);
+				}
+			}
+		};
+		fetchIps();
+	}, [address]);
 
   const activities = [
     {
@@ -98,6 +146,7 @@ export default function Dashboard() {
   ]
 
   return (
+    <>
     <div className="min-h-screen bg-gray-950 text-white">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top Navigation Bar */}
@@ -118,29 +167,29 @@ export default function Dashboard() {
             
             <div className="flex items-center gap-4">
               {/* Login/Role Toggle Section */}
-              {!loggedIn ? (
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    onClick={() => setLoggedIn(true)}
-                    className="p-2 rounded-lg transition-colors border flex items-center gap-2
-                              bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="text-sm">Login</span>
-                  </motion.button>
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    onClick={() => router.push('/signup')}
-                    className="p-2 rounded-lg transition-colors border flex items-center gap-2
-                              bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600"
-                  >
-                    <Plus className="w-5 h-5" />
-                    <span className="text-sm">Sign Up</span>
-                  </motion.button>
-                </div>
+              {/* {!loggedIn ? (
+                                <div className="flex items-center gap-2">
+                                <motion.button
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  onClick={() => setLoggedIn(true)}
+                                  className="p-2 rounded-lg transition-colors border flex items-center gap-2
+                                            bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
+                                >
+                                  <LogOut className="w-5 h-5" />
+                                  <span className="text-sm">Login</span>
+                                </motion.button>
+                                <motion.button
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  onClick={() => router.push('/signup')}
+                                  className="p-2 rounded-lg transition-colors border flex items-center gap-2
+                                            bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600"
+                                >
+                                  <Plus className="w-5 h-5" />
+                                  <span className="text-sm">Sign Up</span>
+                                </motion.button>
+                              </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-400">Role:</span>
@@ -154,7 +203,7 @@ export default function Dashboard() {
                     {isLawyer ? 'Lawyer' : 'Client'}
                   </button>
                 </div>
-              )}
+              )} */}
               
               {/* Notification Button */}
               <motion.button
@@ -321,5 +370,9 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    {searchParams.get('showOnboardingModal') === 'true' && (
+				<OnboardingModal />
+			)}
+    </>
   )
 } 

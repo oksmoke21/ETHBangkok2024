@@ -9,7 +9,7 @@ import { Contract } from 'ethers';
 
 export interface Web3AuthContextDataType {
 	loggedIn: boolean;
-	isLawyer: Dispatch<SetStateAction<boolean>>;
+	isLawyer: boolean;
 	setIsLawyer: Dispatch<SetStateAction<boolean>>;
 	web3auth: Web3Auth | null;
 	userInfo: Partial<UserInfo> | null;

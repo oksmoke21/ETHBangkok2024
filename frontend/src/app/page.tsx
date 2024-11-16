@@ -32,7 +32,7 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null)
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
-  const { web3auth, getAccounts, setLoggedIn, setProvider } = useWeb3Auth();
+  const { web3auth, getAccounts, setLoggedIn, setProvider, setIsLawyer } = useWeb3Auth();
   const router = useRouter()
 
   // Sample marketplace items
@@ -116,6 +116,20 @@ export default function LandingPage() {
     // Add more items as needed
   ]
 
+  const handleItemClick = (item: MarketplaceItem) => {
+    setSelectedItem(item)
+    setIsModalOpen(true)
+  }
+
+  const handleAction = (action: 'buy' | 'contact') => {
+    setIsModalOpen(false)
+    setIsConnectModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+  }
+
   const handleLogin = async () => {
     if (web3auth) {
         if (web3auth.connected) {
@@ -149,19 +163,21 @@ export default function LandingPage() {
             const data = await serverResponse.json();
             console.log('Server response data: ', data);
 
+            const isLawyer = data.isLawyer;
+            console.log("isLawyer: ", isLawyer);
+            if (typeof window !== 'undefined') {
+              if (isLawyer === true) {
+                localStorage.setItem('isLawyer', isLawyer.toString());
+                setLoggedIn(true)
+              }
+              else localStorage.setItem('isLawyer', (!isLawyer).toString());
+            }
+
             if (!data.onboarded) {
                 _showOnboardingModal = true;
-                // if (data.accountType == "lawyer") {
-                    // router.push(`/dashboard?showOnboardingModal=${_showOnboardingModal}`); // Navigate to lawyer dashboard with onboarding modal flag
-                // } else {
                     router.push(`/dashboard?showOnboardingModal=${_showOnboardingModal}`); // Navigate to dashboard with onboarding modal flag
-                // }
             } else {
-                if (data.isLawyer) {
-                    router.push(`/lawyerDashboard`); // Navigate to lawyer dashboard
-                } else {
-                    router.push(`/dashboard`); // Navigate to user dashboard
-                }
+                router.push(`/dashboard`); // Navigate to user dashboard
             }
 
         } catch (error) {
@@ -169,25 +185,7 @@ export default function LandingPage() {
             throw error;
         }
     }
-};
-
-  const handleItemClick = (item: MarketplaceItem) => {
-    setSelectedItem(item)
-    setIsModalOpen(true)
-  }
-
-  const handleAction = (action: 'buy' | 'contact') => {
-    setIsModalOpen(false)
-    setIsConnectModalOpen(true)
-  }
-
-  const handleModalClose = () => {
-    setIsModalOpen(false)
-  }
-
-  const handleNavigate = () => {
-    router.push('/dashboard')
-  }
+  };
 
   const features = [
     {
@@ -338,7 +336,8 @@ export default function LandingPage() {
               <button className="px-8 py-4 border border-emerald-500/30 rounded-lg 
                                hover:bg-emerald-500/10 transition-all duration-300
                                hover:border-emerald-500/50"
-                      onClick={handleLogin}>
+                      onClick={handleLogin}
+                               >
                 Sign In
               </button>
             </motion.div>
@@ -516,7 +515,7 @@ export default function LandingPage() {
                     className="flex-1 py-2 border border-emerald-500/30 rounded-lg text-sm
                              font-medium hover:bg-emerald-500/10 transition-all duration-300"
                   >
-                    Contact Vendor
+                    Contact
                   </button>
                 </div>
               </div>
