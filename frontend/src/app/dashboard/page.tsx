@@ -13,11 +13,16 @@ import {
   Zap,
   Plus,
   Phone,
-  Sun
+  Sun,
+  LogOut,
+  BanknoteIcon,
+  MessageSquare,
+  ArrowRightLeft
 } from 'lucide-react'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import { NotificationPopup } from '@/components/ui/notification-popup'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface DashboardCard {
   title: string
@@ -28,24 +33,23 @@ interface DashboardCard {
 }
 
 export default function Dashboard() {
-  const [isLawyer, setIsLawyer] = useState(false)
   const [notifications, setNotifications] = useState(0)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-  const [isLoggedIn] = useState(false)
+  const { isLoggedIn, isLawyer, setIsLawyer, setIsLoggedIn } = useAuth()
   
   const primaryCards: DashboardCard[] = [
     {
       title: "IP Marketplace",
       description: "Provide borrowers with liquidity, list an IP for loan, buy and sell IP",
       icon: <Globe className="w-6 h-6" />,
-      link: "/marketplace",
+      link: "/dashboard/marketplace",
       gradient: "from-emerald-500 to-emerald-700"
     },
     {
       title: "Top-up wallet",
-      description: "Simply pay for transactions & valuation fees, liquidity, earn rewards and more",
+      description: "Simply pay for transactions & valuation fees, liquidity, earn rewards",
       icon: <Wallet className="w-6 h-6" />,
-      link: "/top-up",
+      link: "dashboard/top-up",
       gradient: "from-emerald-400 to-emerald-600"
     }
   ]
@@ -57,6 +61,39 @@ export default function Dashboard() {
     }, 1500)
     return () => clearTimeout(timer)
   }, [])
+
+  const activities = [
+    {
+      title: "New IP Listed",
+      description: "Blockchain Patent #123 has been listed",
+      time: "2 hours ago",
+      icon: <Globe className="w-5 h-5" />
+    },
+    {
+      title: "Valuation Complete",
+      description: "Your IP valuation report is ready",
+      time: "5 hours ago",
+      icon: <Scale className="w-5 h-5" />
+    },
+    {
+      title: "Loan Approved",
+      description: "Your IP loan request has been approved",
+      time: "1 day ago",
+      icon: <BanknoteIcon className="w-5 h-5" />
+    },
+    {
+      title: "New Message",
+      description: "Alice Johnson sent you a message",
+      time: "2 days ago",
+      icon: <MessageSquare className="w-5 h-5" />
+    },
+    {
+      title: "IP Transfer",
+      description: "Patent transfer completed successfully",
+      time: "3 days ago",
+      icon: <ArrowRightLeft className="w-5 h-5" />
+    }
+  ]
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -78,15 +115,32 @@ export default function Dashboard() {
             </motion.div>
             
             <div className="flex items-center gap-4">
-              {/* Theme Toggle Button (optional) */}
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-2 bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors
-                           border border-emerald-500/10 hover:border-emerald-500/20"
-              >
-                <Sun className="w-5 h-5 text-emerald-400" />
-              </motion.button>
+              {/* Login/Role Toggle Section */}
+              {!isLoggedIn ? (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onClick={() => setIsLoggedIn(true)}
+                  className="p-2 rounded-lg transition-colors border flex items-center gap-2
+                            bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-sm">Login</span>
+                </motion.button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-400">Role:</span>
+                  <button
+                    onClick={() => setIsLawyer(!isLawyer)}
+                    className={`px-3 py-1 rounded-lg text-sm transition-colors
+                               ${isLawyer 
+                                 ? 'bg-emerald-500/20 text-emerald-400' 
+                                 : 'bg-gray-900 text-gray-400'}`}
+                  >
+                    {isLawyer ? 'Lawyer' : 'Client'}
+                  </button>
+                </div>
+              )}
               
               {/* Notification Button */}
               <motion.button
@@ -229,20 +283,7 @@ export default function Dashboard() {
           <section className="mt-12">
             <h2 className="text-2xl font-semibold text-emerald-400 mb-6">Recent Activity</h2>
             <div className="space-y-4">
-              {[
-                {
-                  title: "New IP Listed",
-                  description: "Blockchain Patent #123 has been listed",
-                  time: "2 hours ago",
-                  icon: <Globe className="w-5 h-5" />
-                },
-                {
-                  title: "Valuation Complete",
-                  description: "Your IP valuation report is ready",
-                  time: "5 hours ago",
-                  icon: <Scale className="w-5 h-5" />
-                }
-              ].map((activity, index) => (
+              {activities.map((activity, index) => (
                 <motion.div
                   key={activity.title}
                   initial={{ opacity: 0, x: -20 }}
@@ -261,82 +302,6 @@ export default function Dashboard() {
                   <span className="text-xs text-gray-500">{activity.time}</span>
                 </motion.div>
               ))}
-            </div>
-          </section>
-
-          {/* Quick Actions */}
-          <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Quick Valuation",
-                description: "Get an instant estimate",
-                icon: <Zap className="w-5 h-5" />,
-                color: "emerald"
-              },
-              {
-                title: "List New IP",
-                description: "Add to marketplace",
-                icon: <Plus className="w-5 h-5" />,
-                color: "blue"
-              },
-              {
-                title: "Schedule Call",
-                description: "Talk to an expert",
-                icon: <Phone className="w-5 h-5" />,
-                color: "purple"
-              }
-            ].map((action, index) => (
-              <motion.button
-                key={action.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`p-4 bg-${action.color}-500/10 rounded-lg border border-${action.color}-500/20
-                           hover:bg-${action.color}-500/20 transition-all group text-left`}
-              >
-                <div className={`p-2 bg-${action.color}-500/10 rounded-lg w-fit mb-3
-                                text-${action.color}-400 group-hover:scale-110 transition-transform`}>
-                  {action.icon}
-                </div>
-                <h3 className={`font-medium text-${action.color}-400 mb-1`}>{action.title}</h3>
-                <p className="text-sm text-gray-400">{action.description}</p>
-              </motion.button>
-            ))}
-          </section>
-
-          {/* Market Insights */}
-          <section className="mt-12">
-            <h2 className="text-2xl font-semibold text-emerald-400 mb-6">Market Insights</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-gray-900/50 rounded-lg border border-emerald-500/10">
-                <h3 className="text-lg font-medium text-emerald-400 mb-4">Popular Categories</h3>
-                <div className="space-y-3">
-                  {[
-                    { name: "Blockchain Patents", value: "32%" },
-                    { name: "Software IP", value: "28%" },
-                    { name: "Hardware Patents", value: "24%" }
-                  ].map((category) => (
-                    <div key={category.name} className="flex items-center justify-between">
-                      <span className="text-gray-300">{category.name}</span>
-                      <span className="text-emerald-400 font-medium">{category.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="p-6 bg-gray-900/50 rounded-lg border border-emerald-500/10">
-                <h3 className="text-lg font-medium text-emerald-400 mb-4">Trading Volume</h3>
-                {/* Add a simple chart or statistics here */}
-                <div className="h-32 flex items-end gap-2">
-                  {[40, 70, 45, 30, 90, 60, 80].map((height, index) => (
-                    <div
-                      key={index}
-                      className="flex-1 bg-emerald-500/20 rounded-t transition-all hover:bg-emerald-500/30"
-                      style={{ height: `${height}%` }}
-                    />
-                  ))}
-                </div>
-              </div>
             </div>
           </section>
         </div>

@@ -15,8 +15,22 @@ import {
   LogOut,
   List,
   ListIcon,
-  BanknoteIcon
+  BanknoteIcon,
+  ChevronDown,
+  MessageSquare
 } from 'lucide-react'
+import { useContext } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+
+interface MenuItem {
+  icon: React.ReactNode
+  label: string
+  href?: string
+  children?: {
+    label: string
+    href: string
+  }[]
+}
 
 export default function DashboardLayout({
   children,
@@ -24,20 +38,122 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { isLoggedIn, isLawyer, setIsLoggedIn } = useAuth()
   const pathname = usePathname()
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { icon: <LayoutDashboard />, label: 'Dashboard', href: '/dashboard' },
-    { icon: <Globe />, label: 'IP Management', href: '/dashboard/marketplace' },
-    { icon: <List/>, label: 'IP List', href: '/dashboard/list-ip' },
+    ...(isLoggedIn 
+      ? [
+    ...(isLawyer ? [
+      {
+        icon: <Globe />,
+        label: 'IP Management',
+        children: [
+          { label: 'My IPs', href: '/dashboard/my-ips' },
+          { label: 'IP Valuation Forms', href: '/dashboard/valuation-forms' },
+          { label: 'IP Services', href: '/dashboard/ip-services' }
+        ]
+      }
+    ] : [
+      { icon: <Globe />, label: 'Consultation', href: '/dashboard/consultation' }
+    ]),
+    { icon: <List/>, label: 'Register IP', href: '/dashboard/create-ip' },
+    { icon: <MessageSquare />, label: 'Messages', href: '/dashboard/messages' },
     { icon: <History />, label: 'History', href: '/dashboard/history' },
     { icon: <BanknoteIcon />, label: 'Loans', href: '/dashboard/loans' },
     { icon: <Settings />, label: 'Settings', href: '/dashboard/settings' },
+        ]
+      : [
+          { icon: <Globe />, label: 'Consultation', href: '/dashboard/consultation' }
+        ]
+    )
   ]
+
+  const isActivePath = (href: string) => pathname === href
+
+  const isDropdownActive = (item: MenuItem) => {
+    if (!item.children) return false
+    return item.children.some(child => pathname === child.href)
+  }
+
+  const renderMenuItem = (item: MenuItem) => {
+    if (item.children) {
+      return (
+        <div key={item.label} className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className={`flex items-center justify-between w-full px-4 py-3 rounded-lg
+                       hover:bg-emerald-500/10 hover:text-emerald-400 
+                       transition-all duration-300 group
+                       ${isDropdownActive(item) ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400'}`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`p-2 rounded-lg transition-all duration-300 
+                            ${isDropdownActive(item) ? 'bg-emerald-500/20 scale-110' : 'group-hover:scale-110'}`}>
+                {item.icon}
+              </div>
+              <span className="font-medium">{item.label}</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 
+                                 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {isDropdownOpen && (
+            <div className="pl-12 mt-1 space-y-1">
+              {item.children.map(child => (
+                <Link
+                  key={child.href}
+                  href={child.href}
+                  className={`block px-4 py-2 rounded-lg text-sm
+                             hover:bg-emerald-500/10 hover:text-emerald-400 
+                             transition-all duration-300
+                             ${isActivePath(child.href) ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400'}`}
+                >
+                  {child.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <Link
+        key={item.label}
+        href={item.href!}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+                   hover:bg-emerald-500/10 hover:text-emerald-400 
+                   transition-all duration-300 relative group
+                   ${isActivePath(item.href!) ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400'}`}
+      >
+        <div className={`p-1.5 rounded-lg transition-all duration-300 
+                      ${isActivePath(item.href!) ? 'bg-emerald-500/20 scale-110' : 'group-hover:scale-110'}`}>
+          {item.icon}
+        </div>
+        <span className="font-medium">{item.label}</span>
+        {isActivePath(item.href!) && (
+          <motion.div
+            layoutId="activeTab"
+            className="absolute left-0 w-0.5 h-full bg-gradient-to-b from-emerald-400 to-teal-400 rounded-r"
+          />
+        )}
+      </Link>
+    )
+  }
 
   useEffect(() => {
     setIsSidebarOpen(false)
   }, [pathname])
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    if (pathname !== '/dashboard') {
+      window.location.href = '/dashboard'
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-950">
@@ -68,46 +184,24 @@ export default function DashboardLayout({
 
           <nav className="flex-1 py-8 px-4">
             <div className="space-y-2">
-              {menuItems.map((item) => {
-                const isActive = pathname === item.href
-                
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`flex items-center gap-4 px-4 py-3 rounded-lg
-                               hover:bg-emerald-500/10 hover:text-emerald-400 
-                               transition-all duration-300 relative group
-                               ${isActive ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400'}`}
-                  >
-                    <div className={`p-2 rounded-lg transition-all duration-300 
-                                  ${isActive ? 'bg-emerald-500/20 scale-110' : 'group-hover:scale-110'}`}>
-                      {item.icon}
-                    </div>
-                    <span className="font-medium">{item.label}</span>
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-400 rounded-r"
-                      />
-                    )}
-                  </Link>
-                )
-              })}
+              {menuItems.map(renderMenuItem)}
             </div>
           </nav>
 
           <div className="p-4 mx-4 mb-4 border-t border-emerald-500/10">
-            <button 
-              className="flex items-center gap-4 px-6 py-3 w-full text-gray-400
-                       hover:bg-red-500/10 hover:text-red-400 rounded-lg
-                       transition-all duration-300 group"
-            >
-              <div className="p-2 rounded-lg transition-all duration-300 group-hover:scale-110">
-                <LogOut className="w-5 h-5" />
-              </div>
-              <span className="font-medium">Logout</span>
-            </button>
+            {isLoggedIn && (
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-4 px-6 py-3 w-full text-gray-400
+                         hover:bg-red-500/10 hover:text-red-400 rounded-lg
+                         transition-all duration-300 group"
+              >
+                <div className="p-2 rounded-lg transition-all duration-300 group-hover:scale-110">
+                  <LogOut className="w-5 h-5" />
+                </div>
+                <span className="font-medium">Logout</span>
+              </button>
+            )}
           </div>
         </motion.aside>
       </div>
@@ -140,46 +234,24 @@ export default function DashboardLayout({
 
           <nav className="flex-1 py-8 px-4">
             <div className="space-y-2">
-              {menuItems.map((item) => {
-                const isActive = pathname === item.href
-                
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`flex items-center gap-4 px-4 py-3 rounded-lg
-                               hover:bg-emerald-500/10 hover:text-emerald-400 
-                               transition-all duration-300 relative group
-                               ${isActive ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400'}`}
-                  >
-                    <div className={`p-2 rounded-lg transition-all duration-300 
-                                  ${isActive ? 'bg-emerald-500/20 scale-110' : 'group-hover:scale-110'}`}>
-                      {item.icon}
-                    </div>
-                    <span className="font-medium">{item.label}</span>
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-400 rounded-r"
-                      />
-                    )}
-                  </Link>
-                )
-              })}
+              {menuItems.map(renderMenuItem)}
             </div>
           </nav>
 
           <div className="p-4 mx-4 mb-4 border-t border-emerald-500/10">
-            <button 
-              className="flex items-center gap-4 px-6 py-3 w-full text-gray-400
-                       hover:bg-red-500/10 hover:text-red-400 rounded-lg
-                       transition-all duration-300 group"
-            >
-              <div className="p-2 rounded-lg transition-all duration-300 group-hover:scale-110">
-                <LogOut className="w-5 h-5" />
-              </div>
-              <span className="font-medium">Logout</span>
-            </button>
+            {isLoggedIn && (
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-4 px-6 py-3 w-full text-gray-400
+                         hover:bg-red-500/10 hover:text-red-400 rounded-lg
+                         transition-all duration-300 group"
+              >
+                <div className="p-2 rounded-lg transition-all duration-300 group-hover:scale-110">
+                  <LogOut className="w-5 h-5" />
+                </div>
+                <span className="font-medium">Logout</span>
+              </button>
+            )}
           </div>
         </motion.aside>
       )}

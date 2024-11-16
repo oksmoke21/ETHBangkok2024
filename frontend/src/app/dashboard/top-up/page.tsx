@@ -110,10 +110,10 @@ export default function TopUp() {
       >
         <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 
                       bg-clip-text text-transparent">
-          Top-up DRAU
+          Top-up USDC
         </h1>
         <p className="text-gray-400 mt-2">
-          Manage your DRAU balance and transactions
+          Manage your USDC balance and transactions
         </p>
       </motion.div>
 
@@ -128,7 +128,7 @@ export default function TopUp() {
             <Wallet className="w-5 h-5 text-emerald-400" />
             <h2 className="text-lg font-medium text-emerald-400">Current Balance</h2>
           </div>
-          <p className="text-3xl font-bold text-white">{balance.toFixed(2)} DRAU</p>
+          <p className="text-3xl font-bold text-white">{balance.toFixed(2)} USDC</p>
           <p className="text-sm text-gray-400 mt-1">≈ ${(balance * 10).toFixed(2)} USD</p>
         </motion.div>
 
@@ -145,7 +145,7 @@ export default function TopUp() {
               <div key={transaction.id} className="flex justify-between text-sm">
                 <span className="text-gray-400">{transaction.type}</span>
                 <span className={transaction.amount > 0 ? 'text-green-400' : 'text-red-400'}>
-                  {transaction.amount > 0 ? '+' : ''}{transaction.amount} DRAU
+                  {transaction.amount > 0 ? '+' : ''}{transaction.amount} USDC
                 </span>
               </div>
             ))}
@@ -166,7 +166,7 @@ export default function TopUp() {
           <div className="space-y-3">
             {exchangeRates.map(rate => (
               <div key={rate.currency} className="flex justify-between text-sm">
-                <span className="text-gray-400">1 DRAU</span>
+                <span className="text-gray-400">1 USDC</span>
                 <div className="flex items-center gap-2">
                   <span className="text-white">{rate.rate} {rate.currency}</span>
                   <span className={`text-xs ${
@@ -193,7 +193,7 @@ export default function TopUp() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                Amount (DRAU)
+                Amount (USDC)
               </label>
               <input
                 type="number"
@@ -227,7 +227,7 @@ export default function TopUp() {
             {/* Promotional Banner */}
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
               <p className="text-sm text-emerald-400">
-                🎉 Get 5% bonus on top-ups over 100 DRAU
+                🎉 Get 5% bonus on top-ups over 100 USDC
               </p>
             </div>
 

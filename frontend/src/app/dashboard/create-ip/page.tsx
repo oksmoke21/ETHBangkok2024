@@ -3,8 +3,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ListIP() {
+  const router = useRouter()
+  const { isLawyer } = useAuth()
   const [formData, setFormData] = useState({
     ipNumber: '',
     companyRegNumber: '',
@@ -24,6 +28,33 @@ export default function ListIP() {
   })
 
   const formId = '256c1654-330e-4d10-9c22-a00e888a27eb'
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Get existing IPs from localStorage or initialize empty array
+    const existingIPs = JSON.parse(localStorage.getItem('myIPs') || '[]')
+    
+    // Create new IP object
+    const newIP = {
+      id: `IP${Date.now()}`,
+      ipNumber: formData.ipNumber || `IP${Date.now()}`,
+      name: formData.ipName,
+      valuation: '$0', // Initial valuation
+      eligibleLoanAmount: '$0', // Initial loan amount
+      rating: 0,
+      status: 'Pending'
+    }
+    
+    // Add new IP to array
+    const updatedIPs = [...existingIPs, newIP]
+    
+    // Save to localStorage
+    localStorage.setItem('myIPs', JSON.stringify(updatedIPs))
+    
+    // Redirect to My IPs page
+    router.push('/dashboard/my-ips')
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8">
@@ -50,7 +81,7 @@ export default function ListIP() {
           </div>
         </motion.div>
 
-        <form className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic IP Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div

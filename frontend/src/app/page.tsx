@@ -1,10 +1,137 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Shield, Users, Globe, Zap, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, Shield, Users, Globe, Zap, CheckCircle2, X, User2, Star } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+// Add new interface for marketplace items
+interface MarketplaceItem {
+  id: number
+  title: string
+  price: string
+  category: string
+  image: string
+  description: string
+  details: {
+    type: string
+    status: string
+    jurisdiction: string
+    expiryDate: string
+  }
+  vendor: {
+    name: string
+    rating: number
+    verified: boolean
+  }
+}
 
 export default function LandingPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null)
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
+  const router = useRouter()
+
+  // Sample marketplace items
+  const marketplaceItems: MarketplaceItem[] = [
+    {
+      id: 1,
+      title: "Patent: AI-Driven Analytics",
+      price: "50,000 USDC",
+      category: "Technology",
+      image: "/patent1.jpg",
+      description: "Revolutionary AI-powered analytics system for real-time data processing and predictive modeling. This patent covers core algorithms and implementation methods.",
+      details: {
+        type: "Utility Patent",
+        status: "Granted",
+        jurisdiction: "International",
+        expiryDate: "2043"
+      },
+      vendor: {
+        name: "TechInnovate Labs",
+        rating: 4.8,
+        verified: true
+      }
+    },
+    {
+      id: 2,
+      title: "Trademark: EcoTech™",
+      price: "25,000 USDC",
+      category: "Green Technology",
+      image: "/trademark1.jpg",
+      description: "EcoTech™ is a registered trademark for sustainable technology products and services. This trademark covers eco-friendly products and services.",
+      details: {
+        type: "Service Mark",
+        status: "Registered",
+        jurisdiction: "International",
+        expiryDate: "2043"
+      },
+      vendor: {
+        name: "EcoTech Solutions",
+        rating: 4.7,
+        verified: true
+      }
+    },
+    {
+      id: 3,
+      title: "Copyright: Software Suite",
+      price: "35,000 USDC",
+      category: "Software",
+      image: "/copyright1.jpg",
+      description: "The Software Suite is a copyrighted work for software development and distribution. This copyright covers the source code and documentation.",
+      details: {
+        type: "Copyright",
+        status: "Registered",
+        jurisdiction: "International",
+        expiryDate: "2043"
+      },
+      vendor: {
+        name: "Software Innovators",
+        rating: 4.9,
+        verified: true
+      }
+    },
+    {
+      id: 4,
+      title: "Patent: Quantum Computing",
+      price: "75,000 USDC",
+      category: "Technology",
+      image: "/patent2.jpg",
+      description: "The Quantum Computing patent covers the development and implementation of quantum algorithms and architectures. This patent covers core algorithms and implementation methods.",
+      details: {
+        type: "Utility Patent",
+        status: "Granted",
+        jurisdiction: "International",
+        expiryDate: "2043"
+      },
+      vendor: {
+        name: "QuantumTech Solutions",
+        rating: 4.8,
+        verified: true
+      }
+    },
+    // Add more items as needed
+  ]
+
+  const handleItemClick = (item: MarketplaceItem) => {
+    setSelectedItem(item)
+    setIsModalOpen(true)
+  }
+
+  const handleAction = (action: 'buy' | 'contact') => {
+    setIsModalOpen(false)
+    setIsConnectModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleNavigate = () => {
+    router.push('/dashboard')
+  }
+
   const features = [
     {
       icon: <Shield className="w-6 h-6" />,
@@ -48,7 +175,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {/* Hero Section */}
+      {/* Hero Section - Modified */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
@@ -151,18 +278,6 @@ export default function LandingPage() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-6 justify-center"
             >
-              <Link
-                href="/dashboard"
-                className="group relative px-8 py-4 bg-emerald-500 rounded-lg overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-500 
-                               transition-transform group-hover:translate-x-full duration-500" />
-                <span className="relative flex items-center justify-center gap-2 text-white font-medium">
-                  Explore Marketplace
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-
               <button className="px-8 py-4 border border-emerald-500/30 rounded-lg 
                                hover:bg-emerald-500/10 transition-all duration-300
                                hover:border-emerald-500/50">
@@ -188,6 +303,212 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* New Marketplace Section */}
+      <section className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 
+                         bg-clip-text text-transparent mb-4">
+              Marketplace
+            </h2>
+            <p className="text-xl text-gray-400">
+              Discover and trade intellectual property assets securely
+            </p>
+          </motion.div>
+
+          <div className="relative">
+            <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory">
+              {marketplaceItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  className="min-w-[300px] bg-gray-900/50 rounded-xl p-6 snap-center
+                           border border-emerald-500/20 hover:border-emerald-500/40
+                           transition-all duration-300 cursor-pointer group"
+                  onClick={() => handleItemClick(item)}
+                >
+                  <div className="h-40 bg-emerald-500/10 rounded-lg mb-4 
+                                 group-hover:bg-emerald-500/20 transition-colors" />
+                  <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                  <p className="text-emerald-400 font-medium mb-2">{item.price}</p>
+                  <span className="text-sm text-gray-400">{item.category}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full max-w-md mx-auto px-8 py-4 bg-emerald-500 rounded-lg hover:bg-emerald-600
+                       transition-colors duration-300 font-medium"
+            >
+              Explore More
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Item Detail Modal */}
+      <AnimatePresence>
+        {isModalOpen && selectedItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50
+                     flex items-center justify-center p-4"
+            onClick={() => setIsModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="bg-gray-900 rounded-2xl w-full max-w-lg max-h-[600px] overflow-hidden
+                         border border-emerald-500/20 shadow-2xl shadow-emerald-500/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header with Image Background */}
+              <div className="relative h-32 bg-gradient-to-br from-emerald-500/20 to-emerald-900/20
+                             overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90" />
+                
+                {/* Close button */}
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-3 right-3 p-1.5 rounded-full bg-black/20 
+                           hover:bg-black/40 transition-colors backdrop-blur-sm
+                           border border-white/10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                {/* Title and Category - Overlaid on image */}
+                <div className="absolute bottom-3 left-4 right-4">
+                  <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 
+                               rounded-full text-xs mb-1 inline-block
+                               backdrop-blur-sm border border-emerald-500/20">
+                    {selectedItem.category}
+                  </span>
+                  <h3 className="text-xl font-bold text-white">
+                    {selectedItem.title}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="overflow-y-auto max-h-[calc(600px-8rem)]">
+                <div className="p-4">
+                  {/* Price and Vendor Info in one row */}
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-emerald-400 text-xl font-bold">
+                      {selectedItem.price}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <User2 className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm text-gray-300">{selectedItem.vendor.name}</span>
+                      {selectedItem.vendor.verified && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      {selectedItem.description}
+                    </p>
+                  </div>
+
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {Object.entries(selectedItem.details).map(([key, value]) => (
+                      <div key={key} 
+                           className="p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10
+                                    hover:border-emerald-500/20 transition-colors">
+                        <p className="text-xs text-gray-400">
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </p>
+                        <p className="font-medium text-sm text-white">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons - Fixed at bottom */}
+              <div className="border-t border-emerald-500/10 p-4 bg-gray-900">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleAction('buy')}
+                    className="flex-1 py-2 bg-emerald-500 rounded-lg text-sm font-medium
+                             hover:bg-emerald-600 transition-all duration-300"
+                  >
+                    Buy Now
+                  </button>
+                  <button
+                    onClick={() => handleAction('contact')}
+                    className="flex-1 py-2 border border-emerald-500/30 rounded-lg text-sm
+                             font-medium hover:bg-emerald-500/10 transition-all duration-300"
+                  >
+                    Contact Vendor
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Connect Modal - Updated version */}
+      <AnimatePresence>
+        {isConnectModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50
+                     flex items-center justify-center"
+            onClick={() => setIsConnectModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 p-8 rounded-xl max-w-md w-full mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-2xl font-bold mb-4">Connect to Continue</h3>
+              <p className="text-gray-400 mb-6">
+                Connect your wallet to proceed with the transaction
+              </p>
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full py-3 bg-emerald-500 rounded-lg hover:bg-emerald-600
+                           transition-colors duration-300"
+                >
+                  Connect Wallet
+                </button>
+                <button
+                  onClick={() => setIsConnectModalOpen(false)}
+                  className="w-full py-3 border border-gray-600 rounded-lg
+                           hover:bg-gray-800 transition-colors duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Elevator Pitch with Visual Enhancement */}
       <section className="relative py-32 overflow-hidden">

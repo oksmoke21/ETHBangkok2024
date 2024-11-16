@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -23,16 +24,18 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} h-full bg-gray-950 antialiased`}>
-        <div className="relative min-h-screen">
-          {/* Background gradient effects */}
-          <div className="fixed inset-0 bg-gradient-radial from-emerald-500/5 to-transparent" />
-          <div className="fixed inset-0 bg-gradient-to-t from-gray-950 via-gray-950/80 to-gray-950/20" />
-          
-          {/* Content */}
-          <div className="relative">
-            {children}
+        <AuthProvider>
+          <div className="relative min-h-screen">
+            {/* Background gradient effects */}
+            <div className="fixed inset-0 bg-gradient-radial from-emerald-500/5 to-transparent" />
+            <div className="fixed inset-0 bg-gradient-to-t from-gray-950 via-gray-950/80 to-gray-950/20" />
+            
+            {/* Content */}
+            <div className="relative">
+              {children}
+            </div>
           </div>
-        </div>
+        </AuthProvider>
       </body>
     </html>
   );
