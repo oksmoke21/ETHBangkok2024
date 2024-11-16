@@ -104,7 +104,6 @@ export default function Loans() {
         { date: '2024-06-15', amount: 10000, status: 'pending' }
       ]
     }
-    // Add more mock loans
   ]
 
   // Calculate summary stats
@@ -152,8 +151,8 @@ export default function Loans() {
         status: 'pending',
         completionPercentage: 0,
         blockchainVerified: false,
-        purpose: formData.purpose,
-        applicationDate: new Date().toISOString()
+        repaymentSchedule: [],
+
       }
 
       // Update pending applications
