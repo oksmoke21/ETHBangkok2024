@@ -23,6 +23,7 @@ import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import { NotificationPopup } from '@/components/ui/notification-popup'
 import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 interface DashboardCard {
   title: string
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState(0)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const { isLoggedIn, isLawyer, setIsLawyer, setIsLoggedIn } = useAuth()
+  const router = useRouter()
   
   const primaryCards: DashboardCard[] = [
     {
@@ -117,16 +119,28 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               {/* Login/Role Toggle Section */}
               {!isLoggedIn ? (
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  onClick={() => setIsLoggedIn(true)}
-                  className="p-2 rounded-lg transition-colors border flex items-center gap-2
-                            bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span className="text-sm">Login</span>
-                </motion.button>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => setIsLoggedIn(true)}
+                    className="p-2 rounded-lg transition-colors border flex items-center gap-2
+                              bg-gray-900 border-emerald-500/10 text-gray-400 hover:border-emerald-500/20"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm">Login</span>
+                  </motion.button>
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => router.push('/signup')}
+                    className="p-2 rounded-lg transition-colors border flex items-center gap-2
+                              bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span className="text-sm">Sign Up</span>
+                  </motion.button>
+                </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-400">Role:</span>
