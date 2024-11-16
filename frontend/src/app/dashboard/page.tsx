@@ -42,8 +42,8 @@ export default function Dashboard() {
       gradient: "from-emerald-500 to-emerald-700"
     },
     {
-      title: "Top-up DRAU",
-      description: "Simplified transaction & valuation fees, liquidity, rewards and more",
+      title: "Top-up wallet",
+      description: "Simply pay for transactions & valuation fees, liquidity, earn rewards and more",
       icon: <Wallet className="w-6 h-6" />,
       link: "/top-up",
       gradient: "from-emerald-400 to-emerald-600"

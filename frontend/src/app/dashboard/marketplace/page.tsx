@@ -22,7 +22,7 @@ import {
   X,
   Info
 } from 'lucide-react'
-import { Tooltip } from '../../../../ui/tooltip'
+import { Tooltip } from '@/components/ui/tooltip'
 
 interface IP {
   id: string

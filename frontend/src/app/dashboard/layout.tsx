@@ -12,7 +12,10 @@ import {
   Settings,
   Menu,
   X,
-  LogOut
+  LogOut,
+  List,
+  ListIcon,
+  BanknoteIcon
 } from 'lucide-react'
 
 export default function DashboardLayout({
@@ -25,9 +28,10 @@ export default function DashboardLayout({
 
   const menuItems = [
     { icon: <LayoutDashboard />, label: 'Dashboard', href: '/dashboard' },
-    { icon: <Globe />, label: 'IP Management', href: '/dashboard/ip' },
-    { icon: <Wallet />, label: 'IP Loans', href: '/dashboard/loans' },
+    { icon: <Globe />, label: 'IP Management', href: '/dashboard/marketplace' },
+    { icon: <List/>, label: 'IP List', href: '/dashboard/list-ip' },
     { icon: <History />, label: 'History', href: '/dashboard/history' },
+    { icon: <BanknoteIcon />, label: 'Loans', href: '/dashboard/loans' },
     { icon: <Settings />, label: 'Settings', href: '/dashboard/settings' },
   ]
 
