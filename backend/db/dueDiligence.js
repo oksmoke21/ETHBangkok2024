@@ -26,6 +26,18 @@ export const fetchCompletedDueDiligenceByKeyword = async (field, keyword) => {
     }
 };
 
+export const addDueDiligence = async (dueDiligenceData) => {
+    try {
+        const newDueDiligence = new DueDiligence(dueDiligenceData);
+        await newDueDiligence.save();
+        console.log("DueDiligence data saved:", newDueDiligence); 
+        return newDueDiligence;
+    } catch (error) {
+        console.log("dbError: ", error);
+        throw error;
+    }
+};
+
 export const removeDueDiligence = async (formId) => {
     try {
         const result = await DueDiligence.findOneAndDelete({ formId });
