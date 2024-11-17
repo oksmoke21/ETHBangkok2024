@@ -1,68 +1,65 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Download, Edit, Coins } from 'lucide-react'
-import Link from 'next/link'
-import { useWeb3Auth } from '@/contexts/Web3AuthContext'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Download, Edit, Coins } from 'lucide-react';
+import Link from 'next/link';
+import { useWeb3Auth } from '@/contexts/Web3AuthContext';
 
 interface IP {
-  id: string
-  ipNumber: string
-  name: string
-  valuation: string
-  eligibleLoanAmount: string
-  rating: number
-  status: 'Pending' | 'Approved' | 'Rejected'
+  id: string;
+  ipNumber: string;
+  ipName: string;
+  valuation: string;
+  eligibleAmount: string;
+  rating: number;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Valued' | 'Tokenized';
 }
 
 export default function MyIPs() {
-  const [ips, setIps] = useState<IP[]>([])
-  const { isLawyer } = useWeb3Auth()
+  const [ips, setIps] = useState<IP[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { isLawyer } = useWeb3Auth();
 
   useEffect(() => {
-    // Load IPs from localStorage or use dummy data if empty
-    const savedIPs = JSON.parse(localStorage.getItem('myIPs') || '[]')
-    if (savedIPs.length === 0) {
-      // Add dummy IP if no IPs exist
-      const dummyIP = {
-        id: 'IP2024001',
-        ipNumber: 'IP2024001',
-        name: 'AI Analytics Patent',
-        valuation: '$75,000',
-        eligibleLoanAmount: '$50,000',
-        rating: 4,
-        status: 'Approved' as const
+    const fetchIps = async () => {
+      try {
+        const address = localStorage.getItem('address');
+        if (!address) return;
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/ipTokenization/getMyIPs?address=${address}`
+        );
+        const data = await response.json();
+        setIps(data || []);
+      } catch (error) {
+        console.error('Error fetching IPs:', error);
+      } finally {
+        setLoading(false);
       }
-      localStorage.setItem('myIPs', JSON.stringify([dummyIP]))
-      setIps([dummyIP])
-    } else {
-      setIps(savedIPs)
-    }
-  }, [])
+    };
+
+    fetchIps();
+  }, []);
+
+  console.log("IPs: ")
+  console.log(ips)
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 
-                        bg-clip-text text-transparent">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
             My IPs
           </h1>
-          <p className="text-gray-400 mt-2">
-            Manage and monitor your intellectual property portfolio
-          </p>
+          <p className="text-gray-400 mt-2">Manage and monitor your Intellectual Property portfolio</p>
         </motion.div>
 
         <Link href="/dashboard/create-ip">
           <motion.button
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600
-                     text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Register IP
@@ -90,64 +87,81 @@ export default function MyIPs() {
               </tr>
             </thead>
             <tbody>
-              {ips.map((ip) => (
-                <tr key={ip.id} className="border-b border-emerald-500/10">
-                  <td className="px-6 py-4 text-sm text-gray-300">{ip.ipNumber}</td>
-                  <td className="px-6 py-4 text-sm text-gray-300">{ip.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-300">{ip.valuation}</td>
-                  <td className="px-6 py-4 text-sm text-gray-300">{ip.eligibleLoanAmount}</td>
-                  <td className="px-6 py-4 text-sm text-gray-300">
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <div
-                          key={index}
-                          className={`w-2 h-2 rounded-full ${
-                            index < ip.rating ? 'bg-emerald-400' : 'bg-gray-600'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      ip.status === 'Approved' ? 'bg-emerald-500/20 text-emerald-400' :
-                      ip.status === 'Rejected' ? 'bg-red-500/20 text-red-400' :
-                      'bg-yellow-500/20 text-yellow-400'
-                    }`}>
-                      {ip.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors
-                                 text-emerald-400"
-                        title="Lend Against IP"
-                      >
-                        <Coins className="w-4 h-4" />
-                      </button>
-                      <button
-                        className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors
-                                 text-emerald-400"
-                        title="Download Report"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors
-                                 text-emerald-400"
-                        title="Edit Details"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-8 py-4 text-center text-gray-300">
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : ips.length > 0 ? (
+                ips.map((ip) => (
+                  <tr key={ip.id} className="border-b border-emerald-500/10">
+                    <td className="px-6 py-4 text-sm text-gray-300">{ip.ipNumber}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">{ip.ipName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">{ip.valuation}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">${ip.eligibleAmount}</td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                          <div
+                            key={index}
+                            className={`w-2 h-2 rounded-full ${
+                              index < ip.rating ? 'bg-emerald-400' : 'bg-gray-600'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          ip.status === 'Approved'
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : ip.status === 'Rejected'
+                            ? 'bg-red-500/20 text-red-400'
+                            : ip.status === 'Valued'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}
+                      >
+                        {ip.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors text-emerald-400"
+                          title="Lend Against IP"
+                        >
+                          <Coins className="w-4 h-4" />
+                        </button>
+                        <button
+                          className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors text-emerald-400"
+                          title="Download Report"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                        <button
+                          className="p-2 hover:bg-emerald-500/10 rounded-lg transition-colors text-emerald-400"
+                          title="Edit Details"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-8 py-4 text-center text-gray-300">
+                    No IPs found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </motion.div>
     </div>
-  )
-} 
+  );
+}

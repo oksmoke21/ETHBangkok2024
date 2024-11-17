@@ -1,9 +1,33 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react';
 import { MessageSquare, Shield, Scale, FileText } from 'lucide-react'
 
 export default function IPServices() {
+  const [lawyers, setLawyers] = useState([]);
+  
+  // useEffect(() => {
+  //   const fetchIps = async () => {
+  //     try {
+  //       const address = localStorage.getItem('address');
+  //       if (!address) return;
+
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/ipTokenization/getMyIPs?address=${address}`
+  //       );
+  //       const data = await response.json();
+  //       setIps(data || []);
+  //     } catch (error) {
+  //       console.error('Error fetching IPs:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchIps();
+  // }, []);
+
   const services = [
     {
       icon: <MessageSquare className="w-6 h-6" />,
@@ -46,7 +70,7 @@ export default function IPServices() {
           Professional IP services and consultation
         </p>
       </motion.div>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {services.map((service) => (
           <motion.div

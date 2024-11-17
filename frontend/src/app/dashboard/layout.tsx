@@ -58,8 +58,19 @@ export default function DashboardLayout({
         ]
       }
     ] : [
-      { icon: <Globe />, label: 'Consultation', href: '/dashboard/consultation' }
+      {
+        icon: <Globe />,
+        label: 'IP Management',
+        children: [
+          { label: 'My IPs', href: '/dashboard/my-ips' },
+          { label: 'IP Valuation Forms', href: '/dashboard/valuation-forms' },
+          { label: 'Legal Services & Consultation', href: '/dashboard/ip-services' }
+        ]
+      }
     ]),
+    // [
+    //   { icon: <Globe />, label: 'Consultation', href: '/dashboard/consultation' }
+    // ]
     { icon: <List/>, label: 'Register IP', href: '/dashboard/create-ip' },
     { icon: <MessageSquare />, label: 'Messages', href: '/dashboard/messages' },
     { icon: <History />, label: 'History', href: '/dashboard/history' },

@@ -158,10 +158,10 @@ export default function Dashboard() {
             >
               <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 
                             bg-clip-text text-transparent">
-                Welcome to IPSphere
+                Welcome
               </h1>
               <p className="text-gray-400 mt-2">
-                Your gateway to intellectual property management
+                Your gateway to Intellectual Property
               </p>
             </motion.div>
             
