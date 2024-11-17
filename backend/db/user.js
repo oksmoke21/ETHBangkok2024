@@ -24,6 +24,32 @@ export const fetchUserByKeyword = async (field, keyword) => {
     }
 };
 
+export const fetchAllLawyers = async (field, keyword) => {
+    try {
+        const query = {};
+        query["isLawyer"] = true;
+        const user = await User.findOne(query);
+        return user;
+    } catch (error) {
+        console.log("dbError: ", error);
+        throw error;
+    }
+};
+
+// Keyword can be patent, copyright, trademark
+export const fetchLawyersBySpecialization = async (keyword) => {
+    try {
+        const query = {};
+        query["specialization"] = keyword;
+        query["isLawyer"] = true;
+        const user = await User.findOne(query);
+        return user;
+    } catch (error) {
+        console.log("dbError: ", error);
+        throw error;
+    }
+};
+
 export const removeUser = async (address) => {
     try {
         const result = await User.findOneAndDelete({ address });
