@@ -1,110 +1,102 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react';
-import { PushAPI, CONSTANTS } from '@pushprotocol/restapi';
-import { toast } from 'react-hot-toast';
-import { useWeb3Auth } from '@/contexts/Web3AuthContext';
-import { Lawyer } from '@/types/lawyer';
+import { MessageSquare, Shield, Scale, FileText } from 'lucide-react'
 
-const mockLawyers: Lawyer[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    specialization: "IP Protection",
-    rating: 4.8,
-    walletAddress: "0x123456789abcdef",
-    imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=John"
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    specialization: "Dispute Resolution",
-    rating: 4.9,
-    walletAddress: "0xabcdef123456789",
-    imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane"
-  },
-];
+export default function IPServices() {
+  const [lawyers, setLawyers] = useState([]);
+  
+  // useEffect(() => {
+  //   const fetchIps = async () => {
+  //     try {
+  //       const address = localStorage.getItem('address');
+  //       if (!address) return;
 
-export default function IPServicesPage() {
-  const [lawyers, setLawyers] = useState<Lawyer[]>([]);
-  const { address, isConnected, connect, getSigner } = useWeb3Auth();
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/ipTokenization/getMyIPs?address=${address}`
+  //       );
+  //       const data = await response.json();
+  //       setIps(data || []);
+  //     } catch (error) {
+  //       console.error('Error fetching IPs:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-  useEffect(() => {
-    setLawyers(mockLawyers);
-  }, []);
+  //   fetchIps();
+  // }, []);
 
-  const startChatWithLawyer = async (lawyer: Lawyer) => {
-    try {
-      if (!isConnected) {
-        await connect();
-        return;
-      }
-
-      if (!address) {
-        toast.error('Please connect your wallet first');
-        return;
-      }
-
-      const signer = await getSigner();
-
-      // Initialize Push Protocol user
-      const pushUser = await PushAPI.initialize(signer as any, {
-        env: CONSTANTS.ENV.STAGING,
-        account: address
-      });
-
-      // Send initial message to start the chat
-      await pushUser.chat.send(lawyer.walletAddress, {
-        content: `Hello, I'd like to consult about IP services.`,
-        type: 'Text'
-      });
-
-      toast.success(`Started chat with ${lawyer.name}`);
-    } catch (error) {
-      console.error('Error starting chat:', error);
-      toast.error('Failed to start chat');
+  const services = [
+    {
+      icon: <MessageSquare className="w-6 h-6" />,
+      title: 'Legal Consultation',
+      description: 'Get expert advice on IP protection and strategy',
+      action: 'Schedule Call'
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: 'IP Protection',
+      description: 'Comprehensive IP protection services',
+      action: 'Learn More'
+    },
+    {
+      icon: <Scale className="w-6 h-6" />,
+      title: 'Dispute Resolution',
+      description: 'Professional IP dispute handling',
+      action: 'Get Support'
+    },
+    {
+      icon: <FileText className="w-6 h-6" />,
+      title: 'Documentation',
+      description: 'Complete IP documentation services',
+      action: 'Start Process'
     }
-  };
+  ]
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">IP Legal Consultants</h1>
+    <div className="p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 
+                      bg-clip-text text-transparent">
+          IP Services
+        </h1>
+        <p className="text-gray-400 mt-2">
+          Professional IP services and consultation
+        </p>
+      </motion.div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {lawyers.map((lawyer) => (
-          <div
-            key={lawyer.id}
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {services.map((service) => (
+          <motion.div
+            key={service.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gray-900/50 rounded-lg border border-emerald-500/10 p-6
+                     hover:border-emerald-500/30 transition-colors group"
           >
-            <div className="flex items-center space-x-4 mb-4">
-              <img
-                src={lawyer.imageUrl}
-                alt={lawyer.name}
-                className="w-16 h-16 rounded-full"
-              />
-              <div>
-                <h3 className="text-xl font-semibold">{lawyer.name}</h3>
-                <p className="text-gray-600">{lawyer.specialization}</p>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-400
+                           group-hover:scale-110 transition-transform">
+                {service.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-emerald-400">{service.title}</h3>
+                <p className="text-gray-400 mt-1">{service.description}</p>
+                <button className="mt-4 text-sm text-emerald-400 hover:text-emerald-300
+                                 flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                  {service.action}
+                </button>
               </div>
             </div>
-            
-            <div className="flex items-center mb-4">
-              <div className="flex items-center">
-                <span className="text-yellow-400">★</span>
-                <span className="ml-1">{lawyer.rating.toFixed(1)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => startChatWithLawyer(lawyer)}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-              aria-label={`Message ${lawyer.name}`}
-            >
-              {isConnected ? 'Message' : 'Connect Wallet to Message'}
-            </button>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
-  );
+  )
 } 
