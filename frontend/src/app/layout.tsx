@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Web3AuthProvider } from '@/contexts/Web3AuthContext'
+import { Providers } from './providers';
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -24,7 +24,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} h-full bg-gray-950 antialiased`}>
-        <Web3AuthProvider>
+        <Providers>
           <div className="relative min-h-screen">
             {/* Background gradient effects */}
             <div className="fixed inset-0 bg-gradient-radial from-emerald-500/5 to-transparent" />
@@ -35,7 +35,7 @@ export default function RootLayout({
               {children}
             </div>
           </div>
-        </Web3AuthProvider>
+        </Providers>
       </body>
     </html>
   );
